@@ -223,4 +223,35 @@ export class MarinadeFinanceProgram {
       validatorIndex,
       accounts: await this.depositStakeAccountInstructionAccounts(accountsArgs),
     })
+
+  
+  orderUnstakeInstructionAccounts = async({ marinadeState, ownerAddress, associatedMSolTokenAccountAddress, newTicketAccountAddress }: {
+    marinadeState: MarinadeState,
+    ownerAddress: web3.PublicKey,
+    associatedMSolTokenAccountAddress: web3.PublicKey,
+    newTicketAccountAddress: web3.PublicKey
+  }): Promise<MarinadeFinanceIdl.Instruction.OrderUnstake.Accounts> => ({
+    state: marinadeState.marinadeStateAddress,
+    msolMint: marinadeState.mSolMintAddress,
+    burnMsolFrom: associatedMSolTokenAccountAddress,
+    burnMsolAuthority: ownerAddress,
+    newTicketAccount: newTicketAccountAddress,
+    clock: SYSVAR_CLOCK_PUBKEY,
+    rent: SYSVAR_RENT_PUBKEY,
+    tokenProgram: TOKEN_PROGRAM_ID,
+  })
+
+  orderUnstakeInstruction = ({ accounts, amountLamports }: {
+    accounts: MarinadeFinanceIdl.Instruction.OrderUnstake.Accounts,
+    amountLamports: BN,
+  }): web3.TransactionInstruction => this.program.instruction.orderUnstake(
+    amountLamports,
+    { accounts }
+  )
+
+  orderUnstakeInstructionBuilder = async({ amountLamports, ...accountsArgs }: { amountLamports: BN } & Parameters<this['orderUnstakeInstructionAccounts']>[0]) =>
+    this.orderUnstakeInstruction({
+      amountLamports,
+      accounts: await this.orderUnstakeInstructionAccounts(accountsArgs),
+    })
 }

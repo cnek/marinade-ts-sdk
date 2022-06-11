@@ -9,7 +9,7 @@ describe('Marinade Finance', () => {
     await TestWorld.provideMinimumLamportsBalance(TestWorld.SDK_USER.publicKey, MINIMUM_LAMPORTS_BEFORE_TEST)
   })
 
-  describe('deposit', () => {
+  describe.skip('deposit', () => {
     it('deposits SOL', async() => {
       const config = new MarinadeConfig({
         connection: TestWorld.CONNECTION,
@@ -64,7 +64,7 @@ describe('Marinade Finance', () => {
     })
   })
 
-  describe('liquidUnstake', () => {
+  describe.skip('liquidUnstake', () => {
     it('unstakes SOL', async() => {
       const config = new MarinadeConfig({
         connection: TestWorld.CONNECTION,
@@ -91,6 +91,25 @@ describe('Marinade Finance', () => {
       const { transaction } = await marinade.depositStakeAccount(new web3.PublicKey('2hpYdXDUxWwZFSx6RQVuPHSHuVVZU2Bsz4VLiLvvoG2h'))
       const transactionSignature = await TestWorld.PROVIDER.send(transaction)
       console.log('Deposit stake account tx:', transactionSignature)
+    })
+  })
+
+  describe('orderUnstake', () => {
+    it('order unstakes SOL', async() => {
+      const config = new MarinadeConfig({
+        connection: TestWorld.CONNECTION,
+        publicKey: TestWorld.SDK_USER.publicKey,
+      })
+      const marinade = new Marinade(config)
+
+      try { 
+        const { transaction, newTicketAccountKeypair } = await marinade.orderUnstake(MarinadeUtils.solToLamports(0.001))
+        const transactionSignature = await TestWorld.PROVIDER.send(transaction, [newTicketAccountKeypair])
+        console.log('order unstake tx:', transactionSignature)
+      } catch (err) {
+        console.log('order unstake err:', err)
+      }
+
     })
   })
 })

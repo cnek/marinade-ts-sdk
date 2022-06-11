@@ -3,7 +3,7 @@ import * as TestWorld from './test-world'
 
 const MINIMUM_LAMPORTS_BEFORE_TEST = MarinadeUtils.solToLamports(2)
 
-describe('Marinade Referral', () => {
+describe.skip('Marinade Referral', () => {
   beforeAll(async() => {
     await TestWorld.provideMinimumLamportsBalance(TestWorld.SDK_USER.publicKey, MINIMUM_LAMPORTS_BEFORE_TEST)
   })

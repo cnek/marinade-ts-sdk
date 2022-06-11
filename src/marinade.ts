@@ -288,4 +288,55 @@ export class Marinade {
   async getDelayedUnstakeTickets(beneficiary?: web3.PublicKey): Promise<Map<web3.PublicKey, TicketAccount>> {
     return this.marinadeFinanceProgram.getDelayedUnstakeTickets(beneficiary)
   }
+
+  // order unstake test
+  async orderUnstake(amountLamports: BN): Promise<MarinadeResult.OrderUnstake> {
+    const feePayer = assertNotNullAndReturn(this.config.publicKey, ErrorMessage.NO_PUBLIC_KEY)
+    const ownerAddress = assertNotNullAndReturn(this.config.publicKey, ErrorMessage.NO_PUBLIC_KEY)
+    const marinadeState = await this.getMarinadeState()
+    const transaction = new web3.Transaction()
+
+    const {
+      associatedTokenAccountAddress: associatedMSolTokenAccountAddress,
+      createAssociateTokenInstruction,
+    } = await getOrCreateAssociatedTokenAccount(this.provider, marinadeState.mSolMintAddress, ownerAddress)
+
+    if (createAssociateTokenInstruction) {
+      transaction.add(createAssociateTokenInstruction)
+    }
+
+    const newTicketAccountKeypair = web3.Keypair.generate()
+
+    const createAccountParams = {
+      fromPubkey: feePayer,
+      newAccountPubkey: newTicketAccountKeypair.publicKey,
+      // program TicketAccountData takes 80 (2 pubkey + 2 u64) + 8 (discriminator) bytes
+      lamports: await this.config.connection.getMinimumBalanceForRentExemption(88),
+      space: 88,
+      programId: this.config.marinadeFinanceProgramId,
+    }
+  
+    transaction.add(
+      web3.SystemProgram.createAccount(createAccountParams),
+    )
+  
+    const newTicketAccountAddress = newTicketAccountKeypair.publicKey
+
+    const program = this.marinadeFinanceProgram
+    const orderUnstakeInstruction = await program.orderUnstakeInstructionBuilder({
+      amountLamports,
+      marinadeState,
+      ownerAddress,
+      associatedMSolTokenAccountAddress,
+      newTicketAccountAddress,
+    })
+
+    transaction.add(orderUnstakeInstruction)
+
+    return {
+      associatedMSolTokenAccountAddress,
+      newTicketAccountKeypair,
+      transaction,
+    }
+  }
 }

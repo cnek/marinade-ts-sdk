@@ -2,7 +2,7 @@ import { Marinade, MarinadeConfig, web3, BN } from '../src'
 import { MarinadeReferralStateResponse } from '../src/marinade-referral-state/marinade-referral-state.types'
 import * as TestWorld from './test-world'
 
-describe('Marinade Referral State', () => {
+describe.skip('Marinade Referral State', () => {
   describe('getReferralPartnerState', () => {
     it('fetches the referral program\'s global state which matches the expected type', async() => {
       const config = new MarinadeConfig({
